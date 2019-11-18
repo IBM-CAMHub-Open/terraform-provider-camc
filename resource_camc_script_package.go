@@ -187,6 +187,9 @@ func resourceCamcScriptPackageCreate(d *schema.ResourceData, m interface{}) erro
   if (! d.Get("on_create").(bool)){
 		// Need to set an ID so that the resource gets created in Terraform
 		d.SetId(common.GenUUID())
+		var emptyResult map[string]string
+		emptyResult = make(map[string]string)
+		d.Set("result", emptyResult)
 		return nil
 	}
 	result, err := common.RunScript(d, m)
@@ -206,6 +209,9 @@ func resourceCamcScriptPackageRead(d *schema.ResourceData, m interface{}) error 
 
 func resourceCamcScriptPackageUpdate(d *schema.ResourceData, m interface{}) error {
 	if (! d.Get("on_update").(bool)){
+		var emptyResult map[string]string
+		emptyResult = make(map[string]string)
+		d.Set("result", emptyResult)				
 		return nil
 	}
 	return runRequest(d, m)
@@ -213,6 +219,9 @@ func resourceCamcScriptPackageUpdate(d *schema.ResourceData, m interface{}) erro
 
 func resourceCamcScriptPackageDelete(d *schema.ResourceData, m interface{}) error {
 	if (! d.Get("on_delete").(bool)){
+		var emptyResult map[string]string
+		emptyResult = make(map[string]string)
+		d.Set("result", emptyResult)		
 		return nil
 	}
 	return runRequest(d, m)
