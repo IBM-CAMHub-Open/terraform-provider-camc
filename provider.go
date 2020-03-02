@@ -15,6 +15,7 @@ func Provider() terraform.ResourceProvider {
 		ResourcesMap: map[string]*schema.Resource{
 			"camc_bootstrap":      resourceCamcBootstrap(),
 			"camc_scriptpackage":  resourceCamcScriptPackage(),
+			"camc_updatable_scriptpackage":  resourceCamcUpdatableScriptPackage(),
 			"camc_softwaredeploy": resourceCamcSoftwaredeploy(),
 			"camc_vaultitem":      resourceCamcVaultitem(),
 		},
