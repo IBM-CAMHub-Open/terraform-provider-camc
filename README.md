@@ -7,7 +7,7 @@ This provider is maintained by IBM Corp.
 ## Requirements
 
 Terraform 0.11.7 or 0.12.21
-GO (GO version for Terrafrom version 0.12.21 must be 1.13.x)
+GO (GO version for Terrafrom version 0.12.21 must be greater than 1.13.x)
 
 ## Using the provider
 
@@ -59,7 +59,7 @@ Follow the steps below to get the information on how to use the provider
   mv $GOPATH/src/github.com/IBM-CAMHub-Open/terraform-provider-camc/terraform-provider-camc $GOPATH/bin/terraform-provider-camc_v${PROVIDER_VERSION}
 
 
-Copyright IBM Corp. 2019
+Copyright IBM Corp. 2022
 
 
 
