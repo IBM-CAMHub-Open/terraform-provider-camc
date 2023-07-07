@@ -1,12 +1,12 @@
 //
-// Copyright : IBM Corporation 2016, 2016
+// Copyright : IBM Corporation 2016, 2023
 //
 
 package main
 
 import (
-	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/IBM-CAMHub-Open/terraform-provider-camc/common"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceCamcUpdatableScriptPackage() *schema.Resource {
@@ -29,7 +29,7 @@ func resourceCamcUpdatableScriptPackage() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
-					Type: schema.TypeString,
+					Type:      schema.TypeString,
 					Sensitive: true,
 				},
 				Sensitive: true,
@@ -46,8 +46,8 @@ func resourceCamcUpdatableScriptPackage() *schema.Resource {
 			},
 
 			"source_password": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:      schema.TypeString,
+				Optional:  true,
 				Sensitive: true,
 			},
 
@@ -68,7 +68,7 @@ func resourceCamcUpdatableScriptPackage() *schema.Resource {
 				Type:     schema.TypeMap,
 				Optional: true,
 				Elem: &schema.Schema{
-					Type: schema.TypeString,
+					Type:      schema.TypeString,
 					Sensitive: true,
 				},
 				Sensitive: true,
@@ -111,14 +111,14 @@ func resourceCamcUpdatableScriptPackage() *schema.Resource {
 			},
 
 			"remote_password": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:      schema.TypeString,
+				Optional:  true,
 				Sensitive: true,
 			},
 
 			"remote_key": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:      schema.TypeString,
+				Optional:  true,
 				Sensitive: true,
 			},
 
@@ -133,21 +133,21 @@ func resourceCamcUpdatableScriptPackage() *schema.Resource {
 			},
 
 			"bastion_password": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:      schema.TypeString,
+				Optional:  true,
 				Sensitive: true,
 			},
 
 			"bastion_private_key": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:      schema.TypeString,
+				Optional:  true,
 				Sensitive: true,
-			},	
-					
+			},
+
 			"bastion_port": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
-			},			
+			},
 
 			"trace": &schema.Schema{
 				Type:     schema.TypeBool,
@@ -165,7 +165,7 @@ func resourceCamcUpdatableScriptPackage() *schema.Resource {
 }
 
 func resourceCamcUpdatableScriptPackageCreate(d *schema.ResourceData, m interface{}) error {
-  if (! d.Get("on_create").(bool)){
+	if !d.Get("on_create").(bool) {
 		// Need to set an ID so that the resource gets created in Terraform
 		d.SetId(common.GenUUID())
 		var emptyResult map[string]string
@@ -179,9 +179,9 @@ func resourceCamcUpdatableScriptPackageCreate(d *schema.ResourceData, m interfac
 		return err
 	}
 
-  d.Set("result", result)
+	d.Set("result", result)
 	d.SetId(common.GenUUID())
-  return nil
+	return nil
 }
 
 func resourceCamcUpdatableScriptPackageRead(d *schema.ResourceData, m interface{}) error {
@@ -189,20 +189,20 @@ func resourceCamcUpdatableScriptPackageRead(d *schema.ResourceData, m interface{
 }
 
 func resourceCamcUpdatableScriptPackageUpdate(d *schema.ResourceData, m interface{}) error {
-	if (! d.Get("on_update").(bool)){
+	if !d.Get("on_update").(bool) {
 		var emptyResult map[string]string
 		emptyResult = make(map[string]string)
-		d.Set("result", emptyResult)				
+		d.Set("result", emptyResult)
 		return nil
 	}
 	return runUpdatableRequest(d, m)
 }
 
 func resourceCamcUpdatableScriptPackageDelete(d *schema.ResourceData, m interface{}) error {
-	if (! d.Get("on_delete").(bool)){
+	if !d.Get("on_delete").(bool) {
 		var emptyResult map[string]string
 		emptyResult = make(map[string]string)
-		d.Set("result", emptyResult)		
+		d.Set("result", emptyResult)
 		return nil
 	}
 	return runUpdatableRequest(d, m)
@@ -215,6 +215,6 @@ func runUpdatableRequest(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-  d.Set("result", result)
-  return nil
+	d.Set("result", result)
+	return nil
 }

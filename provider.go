@@ -6,18 +6,18 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/terraform"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func Provider() terraform.ResourceProvider {
+func Provider() *schema.Provider {
 	return &schema.Provider{
 		ResourcesMap: map[string]*schema.Resource{
-			"camc_bootstrap":      resourceCamcBootstrap(),
-			"camc_scriptpackage":  resourceCamcScriptPackage(),
-			"camc_updatable_scriptpackage":  resourceCamcUpdatableScriptPackage(),
-			"camc_softwaredeploy": resourceCamcSoftwaredeploy(),
-			"camc_vaultitem":      resourceCamcVaultitem(),
+			"camc_bootstrap":               resourceCamcBootstrap(),
+			"camc_scriptpackage":           resourceCamcScriptPackage(),
+			"camc_updatable_scriptpackage": resourceCamcUpdatableScriptPackage(),
+			"camc_softwaredeploy":          resourceCamcSoftwaredeploy(),
+			"camc_vaultitem":               resourceCamcVaultitem(),
 		},
 	}
 }

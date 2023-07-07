@@ -1,12 +1,12 @@
 //
-// Copyright : IBM Corporation 2016, 2016
+// Copyright : IBM Corporation 2016, 2023
 //
 
 package main
 
 import (
-	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/IBM-CAMHub-Open/terraform-provider-camc/common"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceCamcSoftwaredeploy() *schema.Resource {

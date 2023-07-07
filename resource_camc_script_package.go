@@ -5,8 +5,8 @@
 package main
 
 import (
-	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/IBM-CAMHub-Open/terraform-provider-camc/common"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceCamcScriptPackage() *schema.Resource {
@@ -30,10 +30,10 @@ func resourceCamcScriptPackage() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
-					Type: schema.TypeString,
+					Type:      schema.TypeString,
 					Sensitive: true,
 				},
-				ForceNew: true,
+				ForceNew:  true,
 				Sensitive: true,
 			},
 
@@ -50,9 +50,9 @@ func resourceCamcScriptPackage() *schema.Resource {
 			},
 
 			"source_password": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:      schema.TypeString,
+				Optional:  true,
+				ForceNew:  true,
 				Sensitive: true,
 			},
 
@@ -75,10 +75,10 @@ func resourceCamcScriptPackage() *schema.Resource {
 				Type:     schema.TypeMap,
 				Optional: true,
 				Elem: &schema.Schema{
-					Type: schema.TypeString,
+					Type:      schema.TypeString,
 					Sensitive: true,
 				},
-				ForceNew: true,
+				ForceNew:  true,
 				Sensitive: true,
 			},
 
@@ -121,16 +121,16 @@ func resourceCamcScriptPackage() *schema.Resource {
 			},
 
 			"remote_password": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:      schema.TypeString,
+				Optional:  true,
+				ForceNew:  true,
 				Sensitive: true,
 			},
 
 			"remote_key": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:      schema.TypeString,
+				Optional:  true,
+				ForceNew:  true,
 				Sensitive: true,
 			},
 
@@ -147,24 +147,24 @@ func resourceCamcScriptPackage() *schema.Resource {
 			},
 
 			"bastion_password": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:      schema.TypeString,
+				Optional:  true,
+				ForceNew:  true,
 				Sensitive: true,
 			},
 
 			"bastion_private_key": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:      schema.TypeString,
+				Optional:  true,
+				ForceNew:  true,
 				Sensitive: true,
-			},	
-					
+			},
+
 			"bastion_port": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-			},			
+			},
 
 			"trace": &schema.Schema{
 				Type:     schema.TypeBool,
@@ -184,7 +184,7 @@ func resourceCamcScriptPackage() *schema.Resource {
 }
 
 func resourceCamcScriptPackageCreate(d *schema.ResourceData, m interface{}) error {
-  if (! d.Get("on_create").(bool)){
+	if !d.Get("on_create").(bool) {
 		// Need to set an ID so that the resource gets created in Terraform
 		d.SetId(common.GenUUID())
 		var emptyResult map[string]string
@@ -198,9 +198,9 @@ func resourceCamcScriptPackageCreate(d *schema.ResourceData, m interface{}) erro
 		return err
 	}
 
-  d.Set("result", result)
+	d.Set("result", result)
 	d.SetId(common.GenUUID())
-  return nil
+	return nil
 }
 
 func resourceCamcScriptPackageRead(d *schema.ResourceData, m interface{}) error {
@@ -208,20 +208,20 @@ func resourceCamcScriptPackageRead(d *schema.ResourceData, m interface{}) error 
 }
 
 func resourceCamcScriptPackageUpdate(d *schema.ResourceData, m interface{}) error {
-	if (! d.Get("on_update").(bool)){
+	if !d.Get("on_update").(bool) {
 		var emptyResult map[string]string
 		emptyResult = make(map[string]string)
-		d.Set("result", emptyResult)				
+		d.Set("result", emptyResult)
 		return nil
 	}
 	return runRequest(d, m)
 }
 
 func resourceCamcScriptPackageDelete(d *schema.ResourceData, m interface{}) error {
-	if (! d.Get("on_delete").(bool)){
+	if !d.Get("on_delete").(bool) {
 		var emptyResult map[string]string
 		emptyResult = make(map[string]string)
-		d.Set("result", emptyResult)		
+		d.Set("result", emptyResult)
 		return nil
 	}
 	return runRequest(d, m)
@@ -234,6 +234,6 @@ func runRequest(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-  d.Set("result", result)
-  return nil
+	d.Set("result", result)
+	return nil
 }

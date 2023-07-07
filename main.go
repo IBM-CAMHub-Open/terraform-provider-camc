@@ -1,11 +1,11 @@
 //
-// Copyright : IBM Corporation 2016, 2016
+// Copyright : IBM Corporation 2016, 2023
 //
 
 package main
 
 import (
-	"github.com/hashicorp/terraform/plugin"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 )
 
 func main() {

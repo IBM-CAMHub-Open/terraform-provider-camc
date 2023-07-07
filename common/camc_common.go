@@ -1,10 +1,11 @@
 //
-// Copyright : IBM Corporation 2016, 2016
+// Copyright : IBM Corporation 2016, 2023
 //
 
 package common
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"crypto/rand"
@@ -21,16 +22,15 @@ import (
 	"os/exec"
 	"strings"
 	"time"
-	"bufio"
 
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
 )
 
 func TraceMessage(d *schema.ResourceData, msg string) string {
 	//Escape percentage from Sprintf formatting
-	msg= strings.Replace(msg, "%", "%%", -1)
+	msg = strings.Replace(msg, "%", "%%", -1)
 	var s string = fmt.Sprintf("\n**********\n%s\n**********", msg)
 	if d.Get("trace").(bool) == true {
 		log.SetFlags(0)
@@ -41,8 +41,8 @@ func TraceMessage(d *schema.ResourceData, msg string) string {
 
 func ErrorMessage(d *schema.ResourceData, msg string, err_msg string) string {
 	//Escape percentage from Sprintf formatting
-	msg= strings.Replace(msg, "%", "%%", -1)
-	err_msg= strings.Replace(err_msg, "%", "%%", -1)
+	msg = strings.Replace(msg, "%", "%%", -1)
+	err_msg = strings.Replace(err_msg, "%", "%%", -1)
 	var s string = fmt.Sprintf("\n**********\n%s\n%s\n**********", msg, err_msg)
 	if d.Get("trace").(bool) == true {
 		log.SetFlags(0)
@@ -94,8 +94,6 @@ func MakeRequest(d *schema.ResourceData, m interface{}, method string) (string, 
 	skip_ssl_verify := d.Get("skip_ssl_verify").(bool)
 	access_token := d.Get("access_token").(string)
 
-	
-		
 	//initialize a tlsConfig structure
 	tlsConfig := &tls.Config{
 		InsecureSkipVerify: skip_ssl_verify,
@@ -122,19 +120,19 @@ func MakeRequest(d *schema.ResourceData, m interface{}, method string) (string, 
 		tlsConfig.RootCAs = caCertPool
 		tlsConfig.BuildNameToCertificate()
 	}
-	
+
 	//initialize the http transport
 	//GO 1.9.x support only http. GO 1.10 supports https
 	//We may need to move to GO 1.1.0
 	tr := &http.Transport{
-		Proxy: http.ProxyFromEnvironment,
+		Proxy:           http.ProxyFromEnvironment,
 		TLSClientConfig: tlsConfig,
 		Dial: (&net.Dialer{
 			Timeout:   15 * time.Second,
 			KeepAlive: 30 * time.Second,
 		}).Dial,
 	}
-	
+
 	//initialize the http client with the defined transport
 	client := &http.Client{
 		Transport: tr,
@@ -176,8 +174,8 @@ func MakeRequest(d *schema.ResourceData, m interface{}, method string) (string, 
 	resp, err := client.Do(req)
 	if err != nil {
 		//return all errors
-		msgStr := []string{"Unable to connect to endpoint ",camc_endpoint}
-		err := fmt.Errorf(ErrorMessage(d, strings.Join(msgStr, "") , err.Error()))
+		msgStr := []string{"Unable to connect to endpoint ", camc_endpoint}
+		err := fmt.Errorf(ErrorMessage(d, strings.Join(msgStr, ""), err.Error()))
 		return "", err
 	}
 
@@ -541,7 +539,7 @@ func RunScript(d *schema.ResourceData, m interface{}) (map[string]string, error)
 		var tryTwo map[string]interface{}
 		err = json.Unmarshal(cmdOutput, &tryTwo)
 		if err == nil {
-			return nil, fmt.Errorf(ErrorMessage(d, fmt.Sprintf("Error: command %q produced JSON that was not key value pairs of strings, which is required by Terraform.", program[0]),""))
+			return nil, fmt.Errorf(ErrorMessage(d, fmt.Sprintf("Error: command %q produced JSON that was not key value pairs of strings, which is required by Terraform.", program[0]), ""))
 		}
 		// The command did not return JSON, but it did return successfully. Return the response as a String
 		result = make(map[string]string)
@@ -621,7 +619,7 @@ func RunRemoteScript(d *schema.ResourceData, m interface{}) (map[string]string, 
 		var tryTwo map[string]interface{}
 		err = json.Unmarshal(cmdOutput, &tryTwo)
 		if err == nil {
-			return nil, fmt.Errorf(ErrorMessage(d, fmt.Sprintf("Error: command %q produced JSON that was not key value pairs of strings, which is required by Terraform.", program[0]),""))
+			return nil, fmt.Errorf(ErrorMessage(d, fmt.Sprintf("Error: command %q produced JSON that was not key value pairs of strings, which is required by Terraform.", program[0]), ""))
 		}
 		// The command did not return JSON, but it did return successfully. Return the response as a String
 		result = make(map[string]string)
@@ -683,7 +681,7 @@ func RemoteExec(d *schema.ResourceData, program []string, query map[string]inter
 		// Should never happen, since we know query will always be a map
 		// from string to string, as guaranteed by d.Get and our schema.
 		return nil, fmt.Errorf(SubErrorMessage(d, "Error: error converting query JSON to map", err.Error()))
-	}    
+	}
 	var clientcp *ssh.Client
 	if bastionHost != "" {
 		localToRemoteClient, bastionclient, bastTohostConn, sshConn, err := getClientUsingBastionConn(d, config)
@@ -717,7 +715,7 @@ func RemoteExec(d *schema.ResourceData, program []string, query map[string]inter
 		}
 		defer session.Close()
 	}
-	//Create a context that will be used to send Done event to keepalive go routine 
+	//Create a context that will be used to send Done event to keepalive go routine
 	//when script execution is completed or results in error.
 	ctx, cancelKeepAlive := context.WithCancel(context.TODO())
 	//go routine to send async ssh request to server every 15 seconds - mimics keepalive.
@@ -739,8 +737,8 @@ func RemoteExec(d *schema.ResourceData, program []string, query map[string]inter
 	}()
 	var b bytes.Buffer
 	session.Stdin = bytes.NewBufferString(string(queryJson[:]))
-	session.Stdout = &b // get output
-	errpipe, _ := session.StderrPipe()	// get error pipe
+	session.Stdout = &b                // get output
+	errpipe, _ := session.StderrPipe() // get error pipe
 	err = session.Run(strings.Join(program, " "))
 	if err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok {
@@ -751,24 +749,24 @@ func RemoteExec(d *schema.ResourceData, program []string, query map[string]inter
 			}
 			//Terminate keepalive routine by sending context cancel message to trigger ctx.Done.
 			cancelKeepAlive()
-			return nil, fmt.Errorf(SubErrorMessage(d, fmt.Sprintf("Error: command %q failed with no error message", program[0]), ""))	
-		} else {		
+			return nil, fmt.Errorf(SubErrorMessage(d, fmt.Sprintf("Error: command %q failed with no error message", program[0]), ""))
+		} else {
 			//Remote error exit throws ssh.ExitError.
 			//Get the error message from error pipe.
 			errout := ""
-			if errpipe != nil{
-	            sc := bufio.NewScanner(errpipe)
-	            var errbuffer bytes.Buffer
-	            for sc.Scan() {
-	            	errbuffer.WriteString(sc.Text())
-	            }
-	            errbuffer.WriteString("\n")
-	            errbuffer.WriteString(err.Error())
-	            errout = errbuffer.String()
+			if errpipe != nil {
+				sc := bufio.NewScanner(errpipe)
+				var errbuffer bytes.Buffer
+				for sc.Scan() {
+					errbuffer.WriteString(sc.Text())
+				}
+				errbuffer.WriteString("\n")
+				errbuffer.WriteString(err.Error())
+				errout = errbuffer.String()
 			}
-			if errout == ""{
+			if errout == "" {
 				errout = err.Error()
-			} 
+			}
 			//Terminate keepalive routine by sending context cancel message to trigger ctx.Done.
 			cancelKeepAlive()
 			return nil, fmt.Errorf(SubErrorMessage(d, fmt.Sprintf("Error: failed to execute %q", program[0]), errout))

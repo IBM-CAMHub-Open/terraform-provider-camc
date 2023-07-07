@@ -1,5 +1,5 @@
 //
-// Copyright : IBM Corporation 2016, 2016
+// Copyright : IBM Corporation 2016, 2023
 //
 
 package main
@@ -11,10 +11,11 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/terraform/helper/schema"
 	"io/ioutil"
 	"log"
 	"net/http"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceCAMC() *schema.Resource {
@@ -225,7 +226,7 @@ func makeCreateRequest(d *schema.ResourceData, m interface{}, url string) (strin
 	//traceMessage(d, "[trace] setting payload to 'null' so not stored in state file")
 	//d.Set("payload", "null")
 
-	if (resp.StatusCode == 200 || resp.StatusCode == 201) {
+	if resp.StatusCode == 200 || resp.StatusCode == 201 {
 		traceMessage(d, fmt.Sprintf("**********  good response StatusCode --> %v, body --> %s", resp.StatusCode, rb))
 		return rb, nil
 	} else {
@@ -319,7 +320,7 @@ func makeRequest(d *schema.ResourceData, m interface{}, url string) (string, err
 	// don't save the payload, may have secrets
 	//d.Set("payload", "null")
 
-	if (resp.StatusCode == 200 || resp.StatusCode == 201) {
+	if resp.StatusCode == 200 || resp.StatusCode == 201 {
 		traceMessage(d, fmt.Sprintf("**********  good response StatusCode --> %v, body --> %s", resp.StatusCode, rb))
 		return rb, nil
 	} else {
