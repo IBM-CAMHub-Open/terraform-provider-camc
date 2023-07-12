@@ -37,9 +37,4 @@ Follow the steps below to get the information on how to use the provider
   go build -o terraform-provider-camc  
   mv $GOPATH/src/github.com/IBM-CAMHub-Open/terraform-provider-camc/terraform-provider-camc $GOPATH/bin/terraform-provider-camc_v${PROVIDER_VERSION}
 
-
 Copyright IBM Corp. 2023
-
-
-
-
