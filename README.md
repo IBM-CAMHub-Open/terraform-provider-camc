@@ -7,7 +7,7 @@ This provider is maintained by IBM Corp.
 ## Requirements
 
 - Terraform Plugin SDK v2
-- GO (GO version must be 1.20.x or greater)
+- GO (GO version must be 1.22.x or greater)
 
 ## Using the provider
 
