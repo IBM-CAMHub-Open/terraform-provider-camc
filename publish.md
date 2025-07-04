@@ -7,6 +7,11 @@
     - https://github.ibm.com/OpenContent/terraform-provider-camc/blob/master/.camhub.yml#L29
     - https://github.ibm.com/OpenContent/terraform-provider-camc/blob/master/.travis.yml#L48
 
+    ```
+        git commit -am "Updating version to v0.3.3.0"
+        git push 
+    ```
+
 2. Tag as publish: https://github.ibm.com/OpenContent/terraform-provider-camc
 ```
 git tag -a -m "tagging it to publish" publish
