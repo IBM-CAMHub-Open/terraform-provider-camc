@@ -8,7 +8,7 @@
     - https://github.ibm.com/OpenContent/terraform-provider-camc/blob/master/.travis.yml#L48
 
     ```
-        git commit -am "Updating version to v0.3.3.0"
+        git commit -am "Updating version to v0.3.5.0"
         git push 
     ```
 

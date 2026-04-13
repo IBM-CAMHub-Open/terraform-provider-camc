@@ -143,7 +143,7 @@ func MakeRequest(d *schema.ResourceData, m interface{}, method string) (string, 
 
 	if data != "null" {
 		if nil != json.Unmarshal([]byte(data), &json_string) {
-			err := fmt.Errorf(ErrorMessage(d, "data is not valid json", data))
+			err := fmt.Errorf("%s", ErrorMessage(d, "data is not valid json", data))
 			return "", err
 		}
 
@@ -162,7 +162,7 @@ func MakeRequest(d *schema.ResourceData, m interface{}, method string) (string, 
 	if access_token != "" {
 		req.Header.Add("Authorization", "Bearer "+access_token)
 	} else {
-		err := fmt.Errorf(ErrorMessage(d, "No access_token supplied, cannot connect to pattern manager", ""))
+		err := fmt.Errorf("%s", ErrorMessage(d, "No access_token supplied, cannot connect to pattern manager", ""))
 		return "", err
 	}
 
@@ -175,7 +175,7 @@ func MakeRequest(d *schema.ResourceData, m interface{}, method string) (string, 
 	if err != nil {
 		//return all errors
 		msgStr := []string{"Unable to connect to endpoint ", camc_endpoint}
-		err := fmt.Errorf(ErrorMessage(d, strings.Join(msgStr, ""), err.Error()))
+		err := fmt.Errorf("%s", ErrorMessage(d, strings.Join(msgStr, ""), err.Error()))
 		return "", err
 	}
 
@@ -194,7 +194,7 @@ func MakeRequest(d *schema.ResourceData, m interface{}, method string) (string, 
 		return rb, nil
 	} else {
 		//return all errors
-		err := fmt.Errorf(ErrorMessage(d, "Error: Response from pattern manager:", fmt.Sprintf("StatusCode:%v\nMessage:\n%s", resp.StatusCode, rb)))
+		err := fmt.Errorf("%s", ErrorMessage(d, "Error: Response from pattern manager:", fmt.Sprintf("StatusCode:%v\nMessage:\n%s", resp.StatusCode, rb)))
 		return "", err
 	}
 }
@@ -205,7 +205,7 @@ func CreateSSHConfig(d *schema.ResourceData, m interface{}) (*ssh.ClientConfig, 
 	remoteKeyEnc := d.Get("remote_key").(string)
 
 	if remoteUser == "" {
-		return nil, fmt.Errorf(ErrorMessage(d, "Error: remote_user is required when specifying remote_host", ""))
+		return nil, fmt.Errorf("%s", ErrorMessage(d, "Error: remote_user is required when specifying remote_host", ""))
 	}
 	config, err := createClientConfig(d, remoteUser, remotePassword, remoteKeyEnc)
 	if err != nil {
@@ -219,7 +219,7 @@ func CreateBastionConfig(d *schema.ResourceData) (*ssh.ClientConfig, error) {
 	bastionPassword := d.Get("bastion_password").(string)
 	bastionKeyEnc := d.Get("bastion_private_key").(string)
 	if bastionUser == "" {
-		return nil, fmt.Errorf(ErrorMessage(d, "Error: bastion_user is required when specifying bastion_host", ""))
+		return nil, fmt.Errorf("%s", ErrorMessage(d, "Error: bastion_user is required when specifying bastion_host", ""))
 	}
 	config, err := createClientConfig(d, bastionUser, bastionPassword, bastionKeyEnc)
 	if err != nil {
@@ -233,11 +233,11 @@ func createClientConfig(d *schema.ResourceData, remoteUser string, remotePasswor
 	if remoteKeyEnc != "" {
 		remoteKey, err := base64.StdEncoding.DecodeString(remoteKeyEnc)
 		if err != nil {
-			return nil, fmt.Errorf(ErrorMessage(d, "Error: error decoding private key. The private key must be base64 encoded", ""))
+			return nil, fmt.Errorf("%s", ErrorMessage(d, "Error: error decoding private key. The private key must be base64 encoded", ""))
 		}
 		key, err := ssh.ParsePrivateKey([]byte(remoteKey))
 		if err != nil {
-			return nil, fmt.Errorf(ErrorMessage(d, "Error: error parsing private key:", err.Error()))
+			return nil, fmt.Errorf("%s", ErrorMessage(d, "Error: error parsing private key:", err.Error()))
 		}
 		// Authentication
 		config = &ssh.ClientConfig{
@@ -260,7 +260,7 @@ func createClientConfig(d *schema.ResourceData, remoteUser string, remotePasswor
 			},
 		}
 	} else {
-		return nil, fmt.Errorf(ErrorMessage(d, "Error: one of user password or key is required when specifying remote_host or bastion_host", ""))
+		return nil, fmt.Errorf("%s", ErrorMessage(d, "Error: one of user password or key is required when specifying remote_host or bastion_host", ""))
 	}
 	return config, nil
 }
@@ -306,7 +306,7 @@ func TransferLocalToRemote(d *schema.ResourceData, m interface{}, localSource st
 	if bastionHost != "" {
 		client, bastionclient, bastTohostConn, sshConn, clienterr = getClientUsingBastionConn(d, config)
 		if clienterr != nil {
-			return fmt.Errorf(SubErrorMessage(d, "Error: error connecting to bastion host", clienterr.Error()))
+			return fmt.Errorf("%s", SubErrorMessage(d, "Error: error connecting to bastion host", clienterr.Error()))
 		}
 		defer client.Close()
 		defer bastionclient.Close()
@@ -315,27 +315,27 @@ func TransferLocalToRemote(d *schema.ResourceData, m interface{}, localSource st
 	} else {
 		client, clienterr = ssh.Dial("tcp", remoteHost+":22", config)
 		if clienterr != nil {
-			return fmt.Errorf(ErrorMessage(d, "Error: error connecting to remote host", fmt.Sprintf("%s: %s", remoteHost, clienterr)))
+			return fmt.Errorf("%s", ErrorMessage(d, "Error: error connecting to remote host", fmt.Sprintf("%s: %s", remoteHost, clienterr)))
 		}
 	}
 	// open an SFTP session over an existing ssh connection.
 	sftp, err := sftp.NewClient(client)
 	if err != nil {
-		return fmt.Errorf(ErrorMessage(d, "Error: error creating sftp client to host", fmt.Sprintf("%s: %s", remoteHost, err)))
+		return fmt.Errorf("%s", ErrorMessage(d, "Error: error creating sftp client to host", fmt.Sprintf("%s: %s", remoteHost, err)))
 	}
 	defer sftp.Close()
 
 	// Open the source file
 	srcFile, err := os.Open(source)
 	if err != nil {
-		return fmt.Errorf(ErrorMessage(d, "Error: error opening local script", err.Error()))
+		return fmt.Errorf("%s", ErrorMessage(d, "Error: error opening local script", err.Error()))
 	}
 	defer srcFile.Close()
 
 	// Create the destination file
 	dstFile, err := sftp.Create(destination)
 	if err != nil {
-		return fmt.Errorf(ErrorMessage(d, "Error: error creating destination file on remote host:", err.Error()))
+		return fmt.Errorf("%s", ErrorMessage(d, "Error: error creating destination file on remote host:", err.Error()))
 	}
 	defer dstFile.Close()
 
@@ -395,7 +395,7 @@ func DownloadRemoteFile(d *schema.ResourceData, m interface{}) error {
 	localSourceDir, err := ioutil.TempDir("/tmp", "")
 	localSourceFile := fmt.Sprintf("%s/%s", localSourceDir, localSource)
 	if err != nil {
-		return fmt.Errorf(ErrorMessage(d, fmt.Sprintf("Error: could not create temporary directory for source file"), err.Error()))
+		return fmt.Errorf("%s", ErrorMessage(d, fmt.Sprintf("Error: could not create temporary directory for source file"), err.Error()))
 	}
 	wgetCommand := BuildWgetCmd(d, m, localSourceFile)
 	_, err = LocalExec(d, wgetCommand, nil)
@@ -418,53 +418,53 @@ func HandleSourceAndDest(d *schema.ResourceData, m interface{}) error {
 
 	if source != "" {
 		if destination == "" {
-			return fmt.Errorf(ErrorMessage(d, "Error: source was specified, but not destination", ""))
+			return fmt.Errorf("%s", ErrorMessage(d, "Error: source was specified, but not destination", ""))
 		}
 		// If source is http(s), download file locally or remotely
 		if strings.HasPrefix(source, "http://") || strings.HasPrefix(source, "https://") {
 			if strings.Contains(source, ";") {
-				return fmt.Errorf(ErrorMessage(d, "Error: source contains illegal chracter: ", ";"))
+				return fmt.Errorf("%s", ErrorMessage(d, "Error: source contains illegal chracter: ", ";"))
 			}
 			if strings.HasPrefix(source, "https://") && (sourceUser == "" || sourcePass == "") {
-				return fmt.Errorf(ErrorMessage(d, "Error: the source_user and source_password properties are required when source is an https URL", ""))
+				return fmt.Errorf("%s", ErrorMessage(d, "Error: the source_user and source_password properties are required when source is an https URL", ""))
 			}
 
 			if remoteHost != "" {
 				err := DownloadRemoteFile(d, m)
 				if err != nil {
-					return fmt.Errorf(ErrorMessage(d, "Error downloading source script", err.Error()))
+					return fmt.Errorf("%s", ErrorMessage(d, "Error downloading source script", err.Error()))
 				}
 			} else {
 				if strings.HasPrefix(strings.TrimSpace(destination), "/") || strings.HasPrefix(strings.TrimSpace(destination), "~") {
-					return fmt.Errorf(ErrorMessage(d, "The destination parameter must be a relative path when downloading locally", ""))
+					return fmt.Errorf("%s", ErrorMessage(d, "The destination parameter must be a relative path when downloading locally", ""))
 				}
 				if strings.Contains(destination, "..") {
-					return fmt.Errorf(ErrorMessage(d, "The destination parameter cannot contain reference to a parent directory", ""))
+					return fmt.Errorf("%s", ErrorMessage(d, "The destination parameter cannot contain reference to a parent directory", ""))
 				}
 				// Download locally using wget
 				wgetCommand := BuildWgetCmd(d, m, destination)
 				_, err := LocalExec(d, wgetCommand, nil)
 				if err != nil {
 					if !sourceNoCheckCert && strings.Contains(err.Error(), "no-check-certificate") {
-						return fmt.Errorf(ErrorMessage(d, fmt.Sprintf("Error: Could not verify the certificate for %s. Set the source_no_check_cert parameter to true if you want to ignore the certificate from the source URL.", source), err.Error()))
+						return fmt.Errorf("%s", ErrorMessage(d, fmt.Sprintf("Error: Could not verify the certificate for %s. Set the source_no_check_cert parameter to true if you want to ignore the certificate from the source URL.", source), err.Error()))
 					} else {
-						return fmt.Errorf(ErrorMessage(d, "Error downloading source script to local system", err.Error()))
+						return fmt.Errorf("%s", ErrorMessage(d, "Error downloading source script to local system", err.Error()))
 					}
 				}
 			}
 		} else {
 			// Local file verification
 			if _, err := os.Stat(source); os.IsNotExist(err) {
-				return fmt.Errorf(ErrorMessage(d, fmt.Sprintf("Error: can't find source program %q", source), ""))
+				return fmt.Errorf("%s", ErrorMessage(d, fmt.Sprintf("Error: can't find source program %q", source), ""))
 			}
 			if remoteHost != "" {
 				return TransferLocalToRemote(d, m, source)
 			} else {
-				return fmt.Errorf(ErrorMessage(d, "Error: copying a file from one directory to another on the provider container is not supported", ""))
+				return fmt.Errorf("%s", ErrorMessage(d, "Error: copying a file from one directory to another on the provider container is not supported", ""))
 			}
 		}
 	} else if destination != "" {
-		return fmt.Errorf(ErrorMessage(d, "Error: one of remote_password or remote_key is required when specifying remote_host", ""))
+		return fmt.Errorf("%s", ErrorMessage(d, "Error: one of remote_password or remote_key is required when specifying remote_host", ""))
 	}
 	return nil
 }
@@ -480,18 +480,18 @@ func RunScript(d *schema.ResourceData, m interface{}) (map[string]string, error)
 	remote_host := d.Get("remote_host").(string)
 
 	if len(programI) < 1 && len(programSens) < 1 {
-		return nil, fmt.Errorf(ErrorMessage(d, "Error: program list must contain at least one element", ""))
+		return nil, fmt.Errorf("%s", ErrorMessage(d, "Error: program list must contain at least one element", ""))
 	}
 
 	for i, vI := range programI {
 		if _, ok := vI.(string); !ok {
-			return nil, fmt.Errorf(ErrorMessage(d, fmt.Sprintf("Error: program element %d is %T. a string is required", i, vI), ""))
+			return nil, fmt.Errorf("%s", ErrorMessage(d, fmt.Sprintf("Error: program element %d is %T. a string is required", i, vI), ""))
 		}
 	}
 
 	for i, vI := range programSens {
 		if _, ok := vI.(string); !ok {
-			return nil, fmt.Errorf(ErrorMessage(d, fmt.Sprintf("Error: program_sensitive element %d is %T. a string is required", i, vI), ""))
+			return nil, fmt.Errorf("%s", ErrorMessage(d, fmt.Sprintf("Error: program_sensitive element %d is %T. a string is required", i, vI), ""))
 		}
 	}
 
@@ -508,7 +508,7 @@ func RunScript(d *schema.ResourceData, m interface{}) (map[string]string, error)
 	// using the PATH environment variable.
 	_, err := exec.LookPath(programI[0].(string))
 	if err != nil {
-		return nil, fmt.Errorf(ErrorMessage(d, fmt.Sprintf("Error: can't find external program %q", programI[0]), ""))
+		return nil, fmt.Errorf("%s", ErrorMessage(d, fmt.Sprintf("Error: can't find external program %q", programI[0]), ""))
 	}
 
 	for i, v := range querySens {
@@ -529,7 +529,7 @@ func RunScript(d *schema.ResourceData, m interface{}) (map[string]string, error)
 
 	cmdOutput, err := LocalExec(d, program, query)
 	if err != nil {
-		return nil, fmt.Errorf(ErrorMessage(d, "Error: error executing local program", err.Error()))
+		return nil, fmt.Errorf("%s", ErrorMessage(d, "Error: error executing local program", err.Error()))
 	}
 
 	var result map[string]string
@@ -539,7 +539,7 @@ func RunScript(d *schema.ResourceData, m interface{}) (map[string]string, error)
 		var tryTwo map[string]interface{}
 		err = json.Unmarshal(cmdOutput, &tryTwo)
 		if err == nil {
-			return nil, fmt.Errorf(ErrorMessage(d, fmt.Sprintf("Error: command %q produced JSON that was not key value pairs of strings, which is required by Terraform.", program[0]), ""))
+			return nil, fmt.Errorf("%s", ErrorMessage(d, fmt.Sprintf("Error: command %q produced JSON that was not key value pairs of strings, which is required by Terraform.", program[0]), ""))
 		}
 		// The command did not return JSON, but it did return successfully. Return the response as a String
 		result = make(map[string]string)
@@ -556,7 +556,7 @@ func LocalExec(d *schema.ResourceData, program []string, query map[string]interf
 	if err != nil {
 		// Should never happen, since we know query will always be a map
 		// from string to string, as guaranteed by d.Get and our schema.
-		return nil, fmt.Errorf(SubErrorMessage(d, "Error: error converting query JSON to map", err.Error()))
+		return nil, fmt.Errorf("%s", SubErrorMessage(d, "Error: error converting query JSON to map", err.Error()))
 	}
 
 	cmd.Stdin = bytes.NewReader(queryJson)
@@ -565,11 +565,11 @@ func LocalExec(d *schema.ResourceData, program []string, query map[string]interf
 	if err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok {
 			if exitErr.Stderr != nil && len(exitErr.Stderr) > 0 {
-				return nil, fmt.Errorf(SubErrorMessage(d, fmt.Sprintf("Error: failed to execute %q", program[0]), string(exitErr.Stderr)))
+				return nil, fmt.Errorf("%s", SubErrorMessage(d, fmt.Sprintf("Error: failed to execute %q", program[0]), string(exitErr.Stderr)))
 			}
-			return nil, fmt.Errorf(SubErrorMessage(d, fmt.Sprintf("Error: command %q failed with no error message", program[0]), ""))
+			return nil, fmt.Errorf("%s", SubErrorMessage(d, fmt.Sprintf("Error: command %q failed with no error message", program[0]), ""))
 		} else {
-			return nil, fmt.Errorf(SubErrorMessage(d, fmt.Sprintf("Error: failed to execute %q", program[0]), err.Error()))
+			return nil, fmt.Errorf("%s", SubErrorMessage(d, fmt.Sprintf("Error: failed to execute %q", program[0]), err.Error()))
 		}
 	}
 	return cmdOutput, nil
@@ -610,7 +610,7 @@ func RunRemoteScript(d *schema.ResourceData, m interface{}) (map[string]string, 
 
 	cmdOutput, err := RemoteExec(d, program, query, config)
 	if err != nil {
-		return nil, fmt.Errorf(ErrorMessage(d, "Error executing remote program", err.Error()))
+		return nil, fmt.Errorf("%s", ErrorMessage(d, "Error executing remote program", err.Error()))
 	}
 	var result map[string]string
 	err = json.Unmarshal(cmdOutput, &result)
@@ -619,7 +619,7 @@ func RunRemoteScript(d *schema.ResourceData, m interface{}) (map[string]string, 
 		var tryTwo map[string]interface{}
 		err = json.Unmarshal(cmdOutput, &tryTwo)
 		if err == nil {
-			return nil, fmt.Errorf(ErrorMessage(d, fmt.Sprintf("Error: command %q produced JSON that was not key value pairs of strings, which is required by Terraform.", program[0]), ""))
+			return nil, fmt.Errorf("%s", ErrorMessage(d, fmt.Sprintf("Error: command %q produced JSON that was not key value pairs of strings, which is required by Terraform.", program[0]), ""))
 		}
 		// The command did not return JSON, but it did return successfully. Return the response as a String
 		result = make(map[string]string)
@@ -642,25 +642,25 @@ func getClientUsingBastionConn(d *schema.ResourceData, rmthostConfig *ssh.Client
 			bastionPort = "22"
 		}
 		if bastionPassword == "" && bastionPrivateKey == "" {
-			return nil, nil, nil, nil, fmt.Errorf(ErrorMessage(d, "Error: Bastion host password and private key is empty", "Provide value for bastion_password or bastion_private_key"))
+			return nil, nil, nil, nil, fmt.Errorf("%s", ErrorMessage(d, "Error: Bastion host password and private key is empty", "Provide value for bastion_password or bastion_private_key"))
 		}
 		bastionConfig, basterr = CreateBastionConfig(d)
 		if basterr != nil {
-			return nil, nil, nil, nil, fmt.Errorf(SubErrorMessage(d, "Error: error creating bastion ssh config", basterr.Error()))
+			return nil, nil, nil, nil, fmt.Errorf("%s", SubErrorMessage(d, "Error: error creating bastion ssh config", basterr.Error()))
 		}
 		bastionclient, err := ssh.Dial("tcp", bastionHost+":"+bastionPort, bastionConfig)
 		if err != nil {
-			return nil, nil, nil, nil, fmt.Errorf(SubErrorMessage(d, "Error: error creating bastion client", err.Error()))
+			return nil, nil, nil, nil, fmt.Errorf("%s", SubErrorMessage(d, "Error: error creating bastion client", err.Error()))
 		}
 		//defer bastionclient.Close()
 		bastTohostConn, err := bastionclient.Dial("tcp", remoteHost+":22")
 		if err != nil {
-			return nil, nil, nil, nil, fmt.Errorf(SubErrorMessage(d, "Error: error creating connection to remote host using bastion client", err.Error()))
+			return nil, nil, nil, nil, fmt.Errorf("%s", SubErrorMessage(d, "Error: error creating connection to remote host using bastion client", err.Error()))
 		}
 		//defer bastTohostConn.Close()
 		sshConn, sshChan, req, err := ssh.NewClientConn(bastTohostConn, remoteHost, rmthostConfig)
 		if err != nil {
-			return nil, nil, nil, nil, fmt.Errorf(SubErrorMessage(d, "Error: error creating connection to remote host using bastion connection to remote host", err.Error()))
+			return nil, nil, nil, nil, fmt.Errorf("%s", SubErrorMessage(d, "Error: error creating connection to remote host using bastion connection to remote host", err.Error()))
 		}
 		//defer sshConn.Close()
 		localToRemoteClient := ssh.NewClient(sshConn, sshChan, req)
@@ -680,14 +680,14 @@ func RemoteExec(d *schema.ResourceData, program []string, query map[string]inter
 	if err != nil {
 		// Should never happen, since we know query will always be a map
 		// from string to string, as guaranteed by d.Get and our schema.
-		return nil, fmt.Errorf(SubErrorMessage(d, "Error: error converting query JSON to map", err.Error()))
+		return nil, fmt.Errorf("%s", SubErrorMessage(d, "Error: error converting query JSON to map", err.Error()))
 	}
 	var clientcp *ssh.Client
 	if bastionHost != "" {
 		localToRemoteClient, bastionclient, bastTohostConn, sshConn, err := getClientUsingBastionConn(d, config)
 		clientcp = localToRemoteClient
 		if err != nil {
-			return nil, fmt.Errorf(SubErrorMessage(d, "Error: error connecting using bastion host", err.Error()))
+			return nil, fmt.Errorf("%s", SubErrorMessage(d, "Error: error connecting using bastion host", err.Error()))
 		}
 		defer bastionclient.Close()
 		defer bastTohostConn.Close()
@@ -696,22 +696,22 @@ func RemoteExec(d *schema.ResourceData, program []string, query map[string]inter
 			defer localToRemoteClient.Close()
 			session, sessionerr = localToRemoteClient.NewSession()
 			if sessionerr != nil {
-				return nil, fmt.Errorf(SubErrorMessage(d, "Error: error creating new session to remote host using bastion host", sessionerr.Error()))
+				return nil, fmt.Errorf("%s", SubErrorMessage(d, "Error: error creating new session to remote host using bastion host", sessionerr.Error()))
 			}
 			defer session.Close()
 		} else {
-			return nil, fmt.Errorf(ErrorMessage(d, "Error: error connecting using bastion host", ""))
+			return nil, fmt.Errorf("%s", ErrorMessage(d, "Error: error connecting using bastion host", ""))
 		}
 	} else {
 		// Connect
 		client, err := ssh.Dial("tcp", remoteHost+":22", config)
 		clientcp = client
 		if err != nil {
-			return nil, fmt.Errorf(SubErrorMessage(d, "Error: error creating remote client", err.Error()))
+			return nil, fmt.Errorf("%s", SubErrorMessage(d, "Error: error creating remote client", err.Error()))
 		}
 		session, sessionerr = client.NewSession()
 		if sessionerr != nil {
-			return nil, fmt.Errorf(SubErrorMessage(d, "Error: error creating remote connection", sessionerr.Error()))
+			return nil, fmt.Errorf("%s", SubErrorMessage(d, "Error: error creating remote connection", sessionerr.Error()))
 		}
 		defer session.Close()
 	}
@@ -745,11 +745,11 @@ func RemoteExec(d *schema.ResourceData, program []string, query map[string]inter
 			if exitErr.Stderr != nil && len(exitErr.Stderr) > 0 {
 				//Terminate keepalive routine by sending context cancel message to trigger ctx.Done.
 				cancelKeepAlive()
-				return nil, fmt.Errorf(SubErrorMessage(d, fmt.Sprintf("Error: failed to execute %q", program[0]), string(exitErr.Stderr)))
+				return nil, fmt.Errorf("%s", SubErrorMessage(d, fmt.Sprintf("Error: failed to execute %q", program[0]), string(exitErr.Stderr)))
 			}
 			//Terminate keepalive routine by sending context cancel message to trigger ctx.Done.
 			cancelKeepAlive()
-			return nil, fmt.Errorf(SubErrorMessage(d, fmt.Sprintf("Error: command %q failed with no error message", program[0]), ""))
+			return nil, fmt.Errorf("%s", SubErrorMessage(d, fmt.Sprintf("Error: command %q failed with no error message", program[0]), ""))
 		} else {
 			//Remote error exit throws ssh.ExitError.
 			//Get the error message from error pipe.
@@ -769,7 +769,7 @@ func RemoteExec(d *schema.ResourceData, program []string, query map[string]inter
 			}
 			//Terminate keepalive routine by sending context cancel message to trigger ctx.Done.
 			cancelKeepAlive()
-			return nil, fmt.Errorf(SubErrorMessage(d, fmt.Sprintf("Error: failed to execute %q", program[0]), errout))
+			return nil, fmt.Errorf("%s", SubErrorMessage(d, fmt.Sprintf("Error: failed to execute %q", program[0]), errout))
 		}
 	}
 	//Terminate keepalive routine by sending context cancel message to trigger ctx.Done.
